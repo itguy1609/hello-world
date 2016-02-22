@@ -1,0 +1,566 @@
+emp.dat   200mb    10000 Records  -> 3 states A/B/C
+
+empid,fn,ln,age,dept,salary
+
+1. find total number of emp  who are getting > 40000
+--> Need Reducer to sum from all maps result
+
+2. List all emp > 40000  ( set reducer to zero )
+-->List logic implement in Map
+--> Map output will be final output ( Number of output =  Number of blocks) ( hdfs  --> blocks/repl apply)
+
+
+b1 - 128 mb - 7000 records  -Inputsplit - map1 -  2000 
+b2 - 72 mb - 3000 records  -Inputsplit - map2 -  1000
+
+
+InputSplits are record by record ref to input data. ( No data --> Logical files )
+
+InputFormat is resp for creating inputsplits and dividing them into records.
+
+As Job startup process InputFormat create inputsplits --> 1 block = 1 inputsplit
+
+
+500 mb web.xml --> 4 blocks --> 4 map tasks
+
+MapReduce --> java program --> 1. Map class 2. Reduce class
+
+1. Map Task ( No of blocks -- No of inputsplit  -- No of maps )
+
+	a. Get the data from input files
+        b. process ( implement logic )   --->  developer
+        c. output (intermediate data -- temporary data)
+           Stored on local FS.
+
+Hadoop framework does sort and shuffling of map data to reducer 
+
+2. Reduce Task ( Reduce task by default it will be 1 )
+
+	a. Read data from all Map task
+	b. process ( aggregation logic )  --> developer
+	c. output ( final output -- hdfs -- blocks/repl apply )
+
+
+InputFormat --> is resp giving input to our mappers ( single key/value pair ) 
+1. Inputsplits on physical blocks 
+2. from InputSplits, RecordReader generate actual data to mappers
+
+
+Default InputFormat class called TextInputFormat
+
+
+
+InputSplits --> logical files --> rec by rec ref.
+
+
+key - value pairs
+-----------------
+Address book --> name, Contact Info
+Bank a/c     --> a/c no, A/c details
+index of a book --> word, page numbers 
+file system --> fn, file content
+
+Input to map        --> GIVEN BY Inputformat  --> individual k/v
+Output from map     --> Developer decides         --> list
+Input to Reducer    --> Same as Maps output  --> key,List of values
+Output from Reducer --> Developer decides
+
+
+
+1. Based on input file user will specify InputFormat
+Textfiles --> text, csv,tsv  --> TextInputFormat
+
+xml--> XmlInputFormat
+
+binary --> SeqFInputF
+
+
+2. As a job startup --> client of hadoop ( InputFormat ) create inputsplits
+
+InputFormat -- inputsplits -- ( rec by rec reference ) 
+
+1 block --  1 inputsplit  -- 1 map  --> sample.txt 100mb ->2 blocks -> 2 InputSplits -> 2 map
+
+TextInputFormat  --> default InputFormat  
+
+key  -  Byteoffset  -->  long --> LongWritable
+value - Entire line -->  string --> Text
+
+sample.txt 200 mb
+=================
+
+1. when you copy/move a file to hdfs --> client lib of hadoop will cut the file into blocks.
+
+b1- data--128 mb
+
+welcome to hadoop learning
+hadoop learining made easy
+.......
+
+b2- data--72 mb
+
+edureka welcome you to hadoop learning
+to complete hadoop echo system
+.......
+
+
+map1 input details  ( single key/value pair )
+----------------
+0, welcome to hadoop learning
+26, hadoop learining made easy
+.....
+==========================================================
+map2 input details
+------------------
+0, edureka welcome you to hadoop learning
+30, to complete hadoop echo system
+.....
+
+
+Map Logic
+=========
+1. read the value 
+2. split words
+3. write ( each word, 1 )
+
+map1 output
+==========
+welcome,1
+to,1
+hadoop,1
+learning,1
+hadoop,1
+learining,1
+made,1
+easy,1
+
+hadoop,1
+hadoop,1
+hadoop,1........2000 times
+....
+
+combiner1
+input
+
+hadoop,[1,1,1,1,1,1,...2000]
+
+combiner output
+
+hadoop,2000
+
+
+map2 output
+===========
+edureka,1
+welcome,1
+you,1
+to,1
+hadoop,1
+learning,1
+to,1
+complete,1
+hadoop,1
+echo,1
+system,1
+.......
+hadoop,1
+hadoop,1
+hadoop,1........1000 times
+
+combiner2
+
+input 
+
+hadoop,[1,1,1,1,1,1,1000]
+output
+
+hadoop,1000
+
+
+1. combiner works on maps output
+2. combiner run at mapper machine
+
+
+
+Reduce input
+-------------
+welcome,[1,1]
+to,[1,1,1,,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,,1,1,1,1,1,1,1...........5000 times]
+hadoop,[2000,1000]
+
+disk i/o
+network i/o
+
+
+Reduce Logic
+
+a. read values
+b. sum all
+c. write output ( key, sum )
+
+output
+------
+
+welcome,2
+to,3
+hadoop,3000
+
+
+java data types		Hadoop classes
+
+String			Text
+int			IntWritable
+float			FloatWritable
+double			DoubleWritable
+long			LongWritable
+
+Writable --> Serializing/Deserializing
+Comparable --> compare
+WritableComparable  --> keys
+
+KeyValueInputFormat ( default delimiter is tab )
+
+emp.dat
+=======
+empid	fn	ln	age	sal	dept
+
+
+1	tejas	s	40	100000	IT
+2	shivu	n	44	100000	HR
+
+
+
+KeyValueInputFormat ( change delimiter to ',' )
+1,tejas,s,40,100000,IT
+2,shivu,n,44,100000,HR
+
+
+
+
+emp.dat
+=======
+empid,fn,ln,age,sal,dept
+
+1 tejas,s,40,50000,IT
+
+Key --> 1 tejas
+value-> s,40,50000,IT
+
+NLineInputFormat
+
+SequenceFileInputFormat
+=================================================
+
+MR PROGRAMMING COMES WITH 2 APIs  ==> Both gen1 and Gen2 supports BOTH APIs
+
+
+
+Old API	DRIVER 							New API DRIVER
+==============
+1. To set job    --->    Jobconf                            Job
+2. To run        --->    JobClient.runJob(conf);            job.waitForCompletion(true);
+
+
+old  (mapred)  API MAPPER
+=========================
+
+1.  public static class Map extends MapReduceBase 
+
+	implements Mapper<LongWritable, Text, Text, IntWritable>
+
+
+2.  public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> output, Reporter reporter)
+				throws IOException{}
+
+3.  output.collect(key,value);
+
+
+new  (mapreduce) API MAPPER
+===========================
+
+1. public class MaxTemperatureMapper extends Mapper<LongWritable, Text, Text, IntWritable>
+
+2. protected void map(LongWritable key, Text value, Context context)
+
+              throws java.io.IOException, InterruptedException {}
+
+3. 	context.write(key,value);
+
+
+
+
+
+
+
+If reducer is set to zero --> Maps output is final output ( blocks + repl apply )
+
+
+
+ALL THE INPUT FILES(BLOCKS) MAP  -->  REDUCER ( OUTPUT->HDFS)
+
+ALL THE INPUT FILES(BLOCKS) MAP  --> COMBINER  --> REDUCER ( OUTPUT->HDFS)
+
+ALL THE INPUT FILES(BLOCKS) MAP  --> COMBINER  --> PARTITIONER  --> REDUCER ( OUTPUT->HDFS)
+
+ALL THE INPUT FILES(BLOCKS) MAP  -->  PARTITIONER --> REDUCER ( OUTPUT->HDFS)
+
+
+emp.dat
+=======
+tejas,IT,150000,Kar
+shivu,HR,200000,Kar
+swetha,IT,200000,Mah
+taran,MAR,150000,Mah
+Srinivas,MAR,120000,And
+
+books.xml
+=========
+<books>
+<book>
+<author></author>
+<name></name>
+<price><price>
+</book>
+<book>
+<author></author>
+<name></name>
+<price><price>
+</book>
+<book>
+<author></author>
+<name></name>
+<price><price>
+</book>
+<book>
+<author></author>
+<name></name>
+<price><price>
+</book>
+<book>
+<author></author>
+<name></name>
+<price><price>
+</book>
+</books>
+
+
+
+Containter --> Variable resources required for appli/task
+
+1. containter created ( var res allocated)
+	a. App Master
+	b. task
+
+
+Max Map Task  --> concurrent execution of Map Task at a server(slave machine)
+
+
+
+Assignment for Class3
+=====================
+
+Take 
+
+empid,fn,dept,sal
+
+
+
+
+1. Create file as below
+
+1,tejas,IT,50000
+2,shivu,IT,30000
+
+2. copy to hadoop
+
+3. Write mapreduce program to list only emp > 40000
+
+		public void map(LongWritable key, Text value,
+				OutputCollector<Text, IntWritable> output, Reporter reporter)
+				throws IOException {
+
+			String line = value.toString();
+
+			// Delimit by space and read 4 th column
+			// compare and write output
+			// output.collect(2 nd column,4 th col);
+
+
+			}
+
+		}
+	}
+
+
+
+
+
+
+MapReduce program
+
+1. Driver Class
+2. Map Class
+3. Reducer Class
+
+
+
+
+1. copy data to hadoop ( any data --> does not check schema of the data when you write )
+2. Block split --> physical 64mb of data -->may cut rec in between ( word file --> one para may get one new line --> one rec )
+
+
+java data types   	Hadoop 
+
+int			IntWritable
+float			FloatWritable
+double			DoubleWritable
+String			Text
+
+
+
+
+2 Java api
+
+Old API
+
+New API
+
+hadoop jar jar_filename program_name input_path output_path
+
+
+1. user submits job
+2. client --> creates inputsplit files --> "App submit context" --> RM
+3. RM finds resource req to start for AppMaster.
+  a.variable resources to run applications/tasks  -->  CPU,Memory,bandwidth,storage  -->containers
+  b. Request NodeManager to start container for AppMaster
+4. AppMaster register with RM  --> Request for Resource Allocation
+5. RM sends back allocation response
+6. AppMaster requests the hosting NodeManger for each container
+7. AppMaster sends a finish message to RM, also notify client
+
+
+
+copy file --> write data to hdfs --> we dont define schema  --> Schema on Read (Hadoop)
+
+
+hadoop --> AAAA
+
+
+
+
+
+1. Input to mapper is decided by .......
+
+2. TextInputFormat is default inputformat for hadoop
+
+key   --> LongWritable
+value --> Text
+
+3. k3/v3  -->
+
+4. Number of blocks --> Number of InputSplits  -->  Number of Maps
+
+5. InputSplits are created as job startup process  --> Client Library
+
+
+abc.txt
+
+wecomal aljdf asljdf aslfja f
+asdfja sdlfj asdlfjasl dflaskf
+asldfjlas dfl.
+
+ alsd asldsa dlf asldjf asldjf
+asdkljfla sdfljasldf aklsjdf
+asdfj asldfj aljsd alsjdf asljdf
+asf askdhfkashd fkhas dfhas
+aksldjfla sdlkfjlas dflajsdf lkj
+asdjf alsjdf alskdjf alsk
+ lajsdflja sldfj asldjf.
+
+
+
+
+
+
+java api
+
+
+old api
+
+new api
+
+
+
+1990,[30,33]
+1991,[35,31]
+1992,[40,38]
+
+
+
+
+HCatalog supports reading and writing files in any format for which a Hive SerDe (serializer-deserializer) can be written. By default, HCatalog supports RCFile, CSV, JSON, and SequenceFile formats. To use a custom format, you must provide the InputFormat, OutputFormat, and SerDe.
+
+HCatalog is built on top of the Hive metastore and incorporates components from the Hive DDL. HCatalog provides read and write interfaces for Pig and MapReduce and uses Hive’s command line interface for issuing data definition and metadata exploration commands. It also presents a REST interface to allow external tools access to Hive DDL (Data Definition Language) operations, such as “create table” and “describe table”.
+
+HCatalog presents a relational view of data. Data is stored in tables and these tables can be placed into databases. Tables can also be partitioned on one or more keys. For a given value of a key (or set of keys) there will be one partition that contains all rows with that value (or set of values).
+
+
+MapReduce Programming ( Java )
+==============================
+1. Complete unstructured data
+2. complex logic
+
+
+
+"EDUREKA, inc",
+
+
+emp.dat  --> It has 3 states employee
+
+create separte output file for each state
+
+1. Set number of Red to 3
+
+Partitioners which divides our data
+
+State --> A,B,C
+
+
+InputSplits are logical files create as job startup process
+
+They are Rec by Rec reference ( no data )
+
+
+POS data 
+
+1 tb 8129 blocks --> 8129 inputsplits --> 8129 mappers
+
+
+Monthly sales 
+
+set number 12  ( Maps output key as month name )
+
+output1  --> Jan
+output2  --> Feb
+....  (Write Partitioners )
+
+
+RecordReaders
+
+
+InputFormat is reponsible for creating inputsplits and dividing them into records.
+
+RecordReaders will generate actual k/v pair and gives to our mappers
+
+
+Mappers output will be written to LFS
+if you have combiner, combiners output will be written to LFS
+
+
+
+
+
+
+
+
+

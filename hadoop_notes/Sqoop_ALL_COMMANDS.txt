@@ -1,0 +1,63 @@
+Sqoop to load data to 
+1. Check both ethernet is up
+2. Check ipconfig from windows machine where mysql is running
+3. Copy mysql connector to sqoop lib folder
+4. Check for table from mysql 
+5. Change target dir if exists
+6. Hive will store table in sqoop lib folder where you are running query. Close hive instance before you run --hive-import
+Transferring an Entire Table
+============================
+The result of this command will be a comma-separated CSV file where each row is stored in a single line.
+
+bin/sqoop import --connect jdbc:mysql://192.168.56.1/edureka --table trainers --username root -P -m 1
+
+By default, Sqoop will create a directory with the same name as the imported table inside your home directory on HDFS and import all data there.
+
+Specifying a Target Directory
+=============================
+
+bin/sqoop import --connect jdbc:mysql://192.168.56.1/edureka --table trainers --username root -P --target-dir /feb20sqoop -m 1
+
+To specify the parent directory for all your Sqoop jobs, instead use the --warehousedir parameter
+
+Importing Only a Subset of Data
+===============================
+
+bin/sqoop import --connect jdbc:mysql://192.168.56.1/edureka --table trainers --username root -P --target-dir sqoop -m 1 --where "experience > 15"
+
+Importing All Your Tables
+=========================
+
+bin/sqoop import-all-tables --connect jdbc:mysql://192.168.56.1/edureka --username root -P -m 1
+
+Importing Only New Data
+=======================
+
+bin/sqoop import --connect jdbc:mysql://192.168.56.1/edureka --table calendar --username root -P --target-dir sqoop --where "cid < 47"
+
+bin/sqoop import --connect jdbc:mysql://192.168.56.1/edureka --table calendar --username root -P --target-dir sqoop --incremental append --check-column cid --last-value 46
+
+Importing Data from Two Tables
+============================
+
+bin/sqoop import --connect jdbc:mysql://192.168.56.1/edureka --query 'select emp.name , dept.deptname from emp join dept on (emp.depid=dept.deptid) where $CONDITIONS' --username root -P --target-dir /sqoopoutput -m 1
+
+
+Note: Specify the --split-by parameter with the column that should be used for slicing
+===== your data into multiple parallel tasks. This parameter usually automatically defaults to
+      the primary key of the main table.
+
+Alternately, the query can be executed once and imported serially, by specifying a single map task with -m 1
+
+Sqoop performs highly efficient data transfers by inheriting Hadoop’s parallelism. To help Sqoop split your query into multiple chunks that can be transferred in parallel, you need to include the $CONDITIONS placeholder in the where clause of your query.
+
+
+
+bin/sqoop export --connect jdbc:mysql://192.168.56.1/edureka --table trainers --username root -P --export-dir /feb20sqoop
+
+bin/sqoop import --connect jdbc:mysql://192.168.56.1/edureka --table calendar --username root -P --hbase-table mstoh1 --column-family info --hbase-row-key cid --hbase-create-table
+
+bin/sqoop import --connect jdbc:mysql://192.168.56.1/edureka --table trainers --username root -P -m 1 --hive-import
+
+bin/sqoop import --connect jdbc:mysql://192.168.56.1/edureka --username root --password root --table trainers --where  "name= 'Tejas'" -m 1
+

@@ -1,0 +1,87 @@
+source --> twitter
+desti  --> hdfs
+
+
+
+myflume.conf
+============
+
+twitterStream.sources=twittersource
+twitterStream.sinks=hdfssink
+twitterStream.channels=memchannel
+
+twitterStream.sources.twittersource.channels=memchannel
+twitterStream.sinks.hdfssink.channel=memchannel
+
+
+bin/flume-ng agent --conf conf --conf-file /home/edureka/flume/agent4.conf --name netcatdemo
+
+
+To Test
+
+curl telnet://localhost:3000
+
+Telnet is a network protocol used to provide a command line interface for communicationg with URL.
+
+Curl is a software package which consists of command line tool and a library for transferring data using URL Syntax.
+
+NetCat is a computer networking service for reading from and writing to network connections using TCP or UDP
+
+https://flume.apache.org/FlumeUserGuide.html
+
+netcat example
+==============
+
+Netcat is a computer networking service for reading from and writing to network connections using TCP or UDP.
+
+
+
+Oozie
+=====
+
+1. Define workflow for wordcount Mapreduce job
+
+	a. Create a folder ( WordCountTest )
+
+	b. write map and reduce class, create jar and put this jar 
+	   inside lib folder of WordCountTest
+	   Dont need to write Driver class
+
+	c. job.properties and workflow
+
+	d. move this folder to HDFS
+
+	e. job.properties
+	specify localtion of folder ( WordCountTest in hdfs )
+
+	e. Run workflow ( using job.properties )
+
+
+oozie job -oozie http://localhost:11000/oozie -config job.properties --run
+
+oozie job -oozie http://localhost:11000/oozie -config /home/edureka/Desktop/LMS/Oozie/WordCountTest/job.properties  --run
+
+
+
+hive data move to HBase
+
+Write WebService to get the data from HBase in/out
+
+Write webUI  ( PHP/Java ) access data from hdfs
+
+
+web.log
+
+
+1. Data Logistics  ( flume/slurper/sqoop oozie )
+
+2. pig/hive, hbase 
+
+3. Pentaho,talend --> Reports 
+
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+<workflow-app xmlns="uri:oozie:workflow:0.2" name="pig-join">
+<start to="pig-node"/>
+<action name="pig-node">
+
+<pig>
+<job-tracker>${jobTracker}</job-tracker>
+<name-node>${nameNode}</name-node>
+<prepare> <delete path="hdfs://localhost:8020/pigoutput"/></prepare>
+<script>joindata.pig</script>
+<argument>-p</argument>
+<argument>input=${INPUT}</argument>
+<argument>-p</argument>
+<argument>output=${OUTPUT}</argument>
+</pig>
+<ok to="end"/>
+<error to="fail"/>
+</action>
+<kill name="fail">
+<message>Hive failed, error message</message>
+</kill>
+<end name="end"/>
+</workflow-app>
+

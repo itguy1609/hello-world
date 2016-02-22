@@ -1,0 +1,67 @@
+Copy all files on desktop.
+
+add jar /home/cloudera/Desktop/HiveProject/hive-serdes-1.0-SNAPSHOT.jar;
+
+CREATE EXTERNAL TABLE tweets (
+  id BIGINT,
+  created_at STRING,
+  source STRING,
+  favorited BOOLEAN,
+  retweeted_status STRUCT<
+    text:STRING,
+    user:STRUCT<screen_name:STRING,name:STRING>,
+    retweet_count:INT>,
+  entities STRUCT<
+    urls:ARRAY<STRUCT<expanded_url:STRING>>,
+    user_mentions:ARRAY<STRUCT<screen_name:STRING,name:STRING>>,
+    hashtags:ARRAY<STRUCT<text:STRING>>>,
+  text STRING,
+  user STRUCT<
+    screen_name:STRING,
+    name:STRING,
+    friends_count:INT,
+    followers_count:INT,
+    statuses_count:INT,
+    verified:BOOLEAN,
+    utc_offset:INT,
+    time_zone:STRING>,
+  in_reply_to_screen_name STRING
+) 
+ROW FORMAT SERDE 'com.cloudera.hive.serde.JSONSerDe';
+
+LOAD DATA LOCAL INPATH '/home/cloudera/Desktop/HiveProject/tweets' OVERWRITE INTO TABLE tweets;
+
+
+Command:
+
+select t.retweeted_screen_name,
+sum(retweets) as total_retweets,
+count(*) as tweet_count 
+from (select retweeted_status.user.screen_name as 
+retweeted_screen_name,
+retweeted_status.text,
+max(retweeted_status.retweet_count) as retweets
+from tweets
+group by retweeted_status.user.screen_name,
+retweeted_status.text)t
+group by t.retweeted_screen_name
+order by total_retweets DESC
+limit 10;
+
+
+Solution:
+OK
+ZachLowe_NBA	136	2
+StatFact	38	1
+jasonkolb	35	1
+cloudera	22	2
+TimHarford	14	1
+PuroMarketing	13	1
+socialmedia2day	13	1
+tcreativo	13	1
+SDL_KeithL	11	1
+j_brisbin	9	1
+Time taken: 45.222 seconds
+
+
+

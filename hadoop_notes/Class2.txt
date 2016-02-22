@@ -1,0 +1,309 @@
+Limitations of Gen1
+====
+1. Single Namespace --> Single NN
+2. NN --> SPOF  --> No HighAvailability
+3. Single JobTracker
+4. Only MR Framework to process the data
+
+
+Limitation Number 1 of Gen1 Taken care by Gen2
+==============================================
+1. Single NN running and managing Single Namespace.  Maintains metadata in RAM
+   
+
+100 slaves/ 1000 slaves  --> Managed by Single NN
+
+Max tested till --> 4000 servers --> Single NN --> Single NameSpace
+
+
+
+
+Oraganisation Abc
+
+Sen - I
+
+UserData --> 100 tb
+
+IT data	--> 500 tb
+
+hbase data --> 1000 tb
+
+
+4000 servers 10tb 
+
+
+Sen - II
+
+UserData --> large data
+
+IT data	--> large data
+
+hbase data --> large data
+
+
+
+
+User data  --> One NN for user data  -- User data NameSpace to be managed separately
+IT data    --> One NN for IT data    -- IT Related data NameSpace to be managed separately
+hbase data --> One NN for hbase data -- App server/DB data NameSpace to be managed separately
+
+
+
+Problem
+Namespace depends on size of RAM of NN
+
+Solution
+==========
+Federation :  Multiple NN managing different Namespaces  --> Big cluster  > 4000 servers
+
+
+
+10000 slave machines servers
+
+3 NN 
+
+1. Each NN knows status of all slave machines and stores/retreives data from all the machines
+
+2. Each manage separate NS
+	NN1-->HR
+	NN2-->Fin
+	NN3-->Mar
+
+
+
+
+
+
+
+Limitation Number 2 of Gen1 Taken care by Gen2
+==============================================
+1. If you loose Namenode you will loose the Cluster details
+2. Manual intervention should be there to start new NameNode and copy backup from SecondaryNN
+
+Secondary NN --> Taking backup and reg intervals  --> Default 1 hour
+
+Problem
+
+10am --> backup to SNN  
+10:45am --> NN breakdown  --> You can get data till 10:00am from SNN ( Problem in Gen 1 )
+
+Solution
+==========
+HighAvailability :  Active and Standby Namenodes manage samedata at given point of time.
+--> In case Active NN fails Standby NN will act as Active and serves request
+
+
+1. Active and Standby will be in sync with the help of Zookeeper ( Coordination api--> used to coordinate b/w multiple deamons ) 
+2. All data nodes send HB to both NNs.
+
+
+
+
+
+Limitation Number 3 of Gen1 Taken care by Gen2
+==============================================
+Sinble JobTracker to manage thousands of jobs
+
+Problem
+
+Jobtracker was overburdend 
+
+Solution
+==========
+YARN with multiple deamons like ResourceManager, NodeManger, ApplicationMaster(one per Application)
+
+Container  --> variable resources allocated per task(in slave m/c) --> cpu,memory,disk,network
+
+1. Resource Manager --> Entire Cluster Lever
+2. NodeManager      --> Per Node/Slave/machine/server
+3. App Master       --> life cycle of job  ( App Master one per job )
+
+
+
+
+slave
+=====
+slave1 or ip address ( 192.168.1.25)
+slave2 or ip address ( 192.168.1.26)
+slave3 or ip address ( 192.168.1.27)
+salve4 or ip address ( 192.168.1.28)
+
+
+
+
+
+Basic flow of MR job 
+=====================
+1. Client communicates with RM to initiate process.
+2. RM response with app ID.
+3. Client create "App Submit context"  ( App jar file, resource required, Secu tokens, Schedular)
+   and submit to RM
+4. RM request NodeManager to start container for AppMaster
+5. App Master Register itself with RM
+6. RM conveys details for starting respective app to App Master
+7. App Master req respective NodeManager to start task ( by allocating contaiers )
+
+
+EMP.dat 100 mb ( 10000 recs )
+
+1. we copy file to hadoop
+
+64mb --> 2 blocks with 3 repl --> 6 blocks for emp.dat --> distributed entire cluster
+
+
+2 blocks  --> 2 Map task
+
+
+Block1 --> 7000 recs  --> map1 --> 2000
+Block2 --> 3000 recs  --> map2 --> 1000
+
+
+1. Find how many emp get sal > 40000
+
+MapReduce program 
+
+1. Map
+
+   a. Reads data from input files
+   b. Implement Business Logic --> Developer  --> check sal> 40000 if yes incr counter
+   c. Output --> counter
+
+Maps output
+===========
+map1
+2000
+
+map2
+1000
+
+2. Reduce
+
+	a. Output of all maps will be given to Reducer by hadoop
+        b. Aggregation logic 
+        c. Output
+
+Reducer output
+=============
+
+3000
+
+
+1. Create jar file of these classes 
+
+2. run jar on input data
+
+
+/usr/lib/hadoop-2.2.0 --> Hadoop_Home
+
+Hadoop_Home/etc/hadoop  --> Configuration files
+
+Hadoop_Home/share/hadoop --> jar files
+
+
+1. Create a toy data
+2. Copy this data to hadoop
+3. Run job ( wordcount )
+
+hadoop jar <jar_filename> <prg_name> <input_file(hdfs path)> <output_dir(hdfs path)>
+
+
+All deamon running in a single machine --> Pseudo Distributed Mode
+
+Multiple Machines --> Fully Distributed Mode
+
+
+put --> copyFromLocal --> copy files from LFS to HDFS
+get --> copyToLocal   --> copy files from HDFS to LFS
+
+
+
+1. install linux-server , java , hadoop in all machines
+2. Choose any one server/system go to hadoop home/etc/hadoop to change conf file
+3. copy this folder to all servers
+4. start hadoop
+
+
+
+
+
+Standalone
+============
+download all hadoop jars
+
+untar
+
+No configuration No hdfs No Deamons
+
+Run Prog (MR) , it will run on Local file system  ( single jvm)
+
+
+Pseudo DM ( Single Machine )
+=========
+download all hadoop jars
+
+untar
+
+and Specify in config files that all deamons has to run in local system ( Single machine )
+
+core-site--> NN	--> localhost
+yarn-site--> RM	-->	localhost
+slave--> DN&NM	--> 	localhost
+
+
+
+Multinode/Fully DM
+=========
+download all hadoop jars
+
+untar
+
+and Specify in config files where all deamons has to run
+
+core-site--> NN	--> 	hostName/IP Address of machine
+yarn-site--> RM	-->	hostName/IP Address of machine
+slave--> DN&NM	--> 	hostName/IP Address of machine Line by Line
+
+Steps
+
+In all machines
+1. install linux
+2. install java
+3. install hadoop
+
+
+take any one machine
+	configure hadoop as above
+	create ssh-key password less 
+
+copy them to all machines 
+
+
+
+
+HDFS-site.xml
+=============
+change default block size 
+change rep factor
+
+
+
+
+
+
+
+
+
+
+
+
+
+=====
+SKU Forecasting
+
+1000 retail outlets data --> 10 am 
+
+
+
+
+
+

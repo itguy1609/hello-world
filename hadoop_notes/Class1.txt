@@ -1,0 +1,202 @@
+1. Data will be stored and processed only in slave machines.
+
+2. File will be split into blocks 128mb max size ( which is configurable )
+
+3. Each block replicated to 3 times ( configurable  --> replication factor )
+
+4. Each Repl for a particular block is written in a separate slave machine --> for fault tolerance
+
+5. when you process/read data, any one of the repl will be considered for a block.
+
+
+10 slave machines  
+
+1tb --> 8192 blocks 
+
+16 tb --> weblogn.dat
+
+16*3 = 48 tb  
+
+
+1 tb = 1024*1024
+
+
+FSImage
+EditLogs
+
+
+
+
+
+
+answer/4(100)
+answer/60 minutes
+
+Apache 		Opensource
+Cloucera	CDH
+IBM 		BigInsights
+Microsoft 	HDInsights
+MapR
+HortonWorks
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. Datanodes can be in multiple racks
+2. Namenode manages metadata  ( Namespace --> files and directory structure)
+3. Client ( hadoop library/ hadoop programs --> which acts as interface b/w user and hdfs )
+4. 
+	a. User request read/write
+        b. Client gets metata from NN
+        c. Client reads/writes data from/to datanodes and gives to users
+
+1. Namenode manages FSImage + EditLogs
+	a. when cluster starts/restart, NN takes complete snapshot of fs from cluster into FSImage
+        b. Any add/delete files will be updated to Editlogs
+
+a. copy file 500mb emp.dat into hadoop
+    
+   a. Client split data into 8 blocks
+
+   b. Writes Each block with 3 repl. 
+  
+
+b. Reading a file size 100 mb 
+
+Read 2 blocks
+
+Note:
+
+1. Processing of blocks of data will be in parallel.
+
+2. Blocks are written in parallel, but the block replication happen in sequence.
+
+Linux --> kbs
+
+Hadoop --> 64 mbs  --> optimised to access batches of data set  ( high throughput )
+
+
+
+id,fn,ln,dept,sal,prof,intro
+
+
+<books>
+
+<book>
+<a>
+</a>
+<p>
+</p>
+<y>
+</y>
+<desc>
+</desc>
+</book>
+
+<book>
+<a>
+</a>
+<p>
+</p>
+<y>
+</y>
+<desc>
+</desc>
+</book>
+
+<book>
+<a>
+</a>
+<p>
+</p>
+<y>
+</y>
+<desc>
+</desc>
+</book>
+
+</books>
+
+
+Diff Number 1
+
+Gen 1
+
+NN--> Single Point Of Failure
+
+Single NN ( if NN fails manual intervension is required)
+
+Yahoo has tested till 4000 slaves
+
+RAM  --> Metadata stored in RAM
+
+
+Gen - 2
+
+High Availability
+
+Active and Standby --> 2 NN
+
+
+
+Diff Number 2
+
+Gen 1
+
+Only MapReduce Framework to process the data
+
+
+Gen 2
+
+MapReduce is one of the processing Env
+
+
+1. We can have multiple racks
+
+2. We have client  ( Hadoop library )
+	Interface b/w user and hadoop
+
+3. Client reads/write data to and from datanodes
+
+
+
+write 200 mb emp.dat
+
+128 mb		if RF is 3 NN will give 3 DN address to write
+
+72 mb 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,134 @@
+comment in script
+
+
+
+
+When not to use pig
+
+1. Completely Unstructure data  -- video, audio, text, email bodies, comments, reviews
+2. Complex login -- Encryption, senti-analysis
+
+
+
+
+operators/operations/transformations--> PigLatin
+
+load
+store
+filter
+join
+order
+limit
+union
+split
+
+
+Pig is not a data logistic tool 
+
+Pig assumes data to be on HDFS
+
+emp.dat  --> 200mb
+
+/pigdata/emp.dat --> hadoop directory
+
+
+Programming structure of Pig
+============================
+
+1. load  --> we specify which data to be processed along with schema
+
+2. processing/business logic  --> 
+
+PigLatin
+
+filter
+join
+order
+limit
+union
+split
+
+
+3. dump/store
+
+	Show result on to the console  --> dump
+	Save result on hdfs	       --> store
+
+** When you say dump/store pig executes the program  -->  MapReduce programs
+
+1. Logical Plan
+
+2. Physical Plan
+
+3. MapReduce Plan
+
+
+1. Pig Sits on top of Hadoop and Builds MapReduce jobs behind the screen to spread across many servers
+
+2. Multiple Data Sources  : Supports many relational features join,group,aggregate data.
+
+3. Sampling of data set 
+
+
+
+
+
+
+Pig
+
+1. Data should be available in HDFS
+
+Pig Processing
+
+1. load ( specify which data to be processed at run time. we also define schema )
+2. process  filter, group, join, order
+3. print result
+
+	dump	prints result into the console
+	store	saves result into HDFS
+
+when you dump/store pig starts execution.
+
+
+
+
+
+Pig by default takes tab as delimiter between fields.
+By default data type of any column will be byterarray;
+
+
+Pig takes bytearray as datatype by default
+
+We need to use custom loaders ( java program ) to load specific columns
+
+
+
+
+
+1   mydata = load '/pig/pigdata' as (f1:int,f2:int,f3:int);
+2   grpdata = group mydata by f1;
+
+dump grpdata;
+
+
+Data Processing
+
+	Data Collection
+	Data Preparation  --> ETL --> Data Factory
+	Data Presentation
+
+Group command
+
+This collects together records with same key into a bag
+
+This results 2 columns
+
+1. key	--> group
+2. bag	--> prev alias name ( which grouped on )
+
+
+
+
+
+
+

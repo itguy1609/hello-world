@@ -1,0 +1,12 @@
+bin/flume-ng agent --conf conf --conf-file /home/edureka/flume/agent4.conf --name agent4
+
+
+To Test
+
+curl telnet://localhost:3000
+
+Telnet is a network protocol used to provide a command line interface for communicationg with URL.
+
+Curl is a software package which consists of command line tool and a library for transferring data using URL Syntax.
+
+NetCat is a computer networking service for reading from and writing to network connections using TCP or UDP

@@ -1,0 +1,17 @@
+netcatdemo.sources = netsource
+netcatdemo.sinks = hdfssink
+netcatdemo.channels = memorychannel
+netcatdemo.sources.netsource.type = netcat
+netcatdemo.sources.netsource.bind = localhost
+netcatdemo.sources.netsource.port = 3000
+netcatdemo.sinks.hdfssink.type = hdfs
+netcatdemo.sinks.hdfssink.hdfs.path = /flume
+netcatdemo.sinks.hdfssink.hdfs.filePrefix = log
+netcatdemo.sinks.hdfssink.hdfs.rollInterval = 0
+netcatdemo.sinks.hdfssink.hdfs.rollCount = 3
+netcatdemo.sinks.hdfssink.hdfs.fileType = DataStream
+netcatdemo.channels.memorychannel.type = memory
+netcatdemo.channels.memorychannel.capacity = 1000
+netcatdemo.channels.memorychannel.transactionCapacity = 100
+netcatdemo.sources.netsource.channels = memorychannel
+netcatdemo.sinks.hdfssink.channel = memorychannel
